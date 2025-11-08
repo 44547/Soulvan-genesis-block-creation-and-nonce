@@ -9,7 +9,7 @@ on:
       - 'Packages/com.soulvan.neonvault/**'
 
 env:
-  UNITY_EXEC: Unity              # override if runner uses different path
+  UNITY_VERSION: '2021.3.31f1'
   PACKAGE_NAME: com.soulvan.neonvault
   PACKAGE_VERSION: 1.0.0
 
@@ -20,7 +20,17 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
+          lfs: true
           fetch-depth: 0
+
+      - name: Cache Unity Library
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-ci-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-ci-
+            Library-
 
       - name: Ensure dist folder
         run: mkdir -p dist
@@ -28,36 +38,62 @@ jobs:
       - name: Set environment variables for importer
         run: |
           echo "SOULVAN_SEED_JSON_FOLDER=${{ github.workspace }}/Assets/Soulvan/ScriptableObjects/seed-json" >> $GITHUB_ENV
+          echo "SOULVAN_API_BASE_URL=${{ secrets.SOULVAN_API_BASE_URL }}" >> $GITHUB_ENV
+          echo "SOULVAN_REPLAY_ENDPOINT=${{ secrets.SOULVAN_REPLAY_ENDPOINT }}" >> $GITHUB_ENV
+          echo "SOULVAN_DAO_ENDPOINT=${{ secrets.SOULVAN_DAO_ENDPOINT }}" >> $GITHUB_ENV
+          echo "SOULVAN_DEFAULT_CONTRIBUTOR=${{ secrets.SOULVAN_DEFAULT_CONTRIBUTOR }}" >> $GITHUB_ENV
+          echo "SOULVAN_IMPORTER_CSV_PATH=Assets/Soulvan/Docs/import-log.csv" >> $GITHUB_ENV
 
       - name: Set EditorPrefs in Unity (writes ephemeral prefs)
+        uses: game-ci/unity-builder@v4
         env:
-          SOULVAN_API_BASE_URL: ${{ secrets.SOULVAN_API_BASE_URL }}
-          SOULVAN_REPLAY_ENDPOINT: ${{ secrets.SOULVAN_REPLAY_ENDPOINT }}
-          SOULVAN_DAO_ENDPOINT: ${{ secrets.SOULVAN_DAO_ENDPOINT }}
-          SOULVAN_DEFAULT_CONTRIBUTOR: ${{ secrets.SOULVAN_DEFAULT_CONTRIBUTOR }}
-          SOULVAN_IMPORTER_CSV_PATH: "Assets/Soulvan/Docs/import-log.csv"
-        run: |
-          echo "Note: Unity CLI commands require Unity installation on CI runner"
-          echo "Add Unity installation step before this or use game-ci/unity-builder action"
-          # $UNITY_EXEC -batchmode -quit -projectPath . -executeMethod Soulvan.CI.CIImportWrappers.SetEditorPrefsFromEnv -logFile ci_setprefs.log
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: StandaloneLinux64
+          buildMethod: Soulvan.CI.CIImportWrappers.SetEditorPrefsFromEnv
+          allowDirtyBuild: true
         continue-on-error: false
 
       - name: Run JSON importer (strongly typed)
-        run: |
-          echo "Note: Uncomment when Unity is available in CI"
-          # $UNITY_EXEC -batchmode -quit -projectPath . -executeMethod Soulvan.CI.CIImportWrappers.RunStrongJsonImport -logFile ci_importer.log
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: StandaloneLinux64
+          buildMethod: Soulvan.CI.CIImportWrappers.RunStrongJsonImport
+          allowDirtyBuild: true
 
       - name: Run CSV importer variant (optional, produces import-log.csv)
         if: always()
-        run: |
-          echo "Note: Uncomment when Unity is available in CI"
-          # $UNITY_EXEC -batchmode -quit -projectPath . -executeMethod Soulvan.CI.CIImportWrappers.RunCsvJsonImportWithLog -logFile ci_importer_csv.log
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: StandaloneLinux64
+          buildMethod: Soulvan.CI.CIImportWrappers.RunCsvJsonImportWithLog
+          allowDirtyBuild: true
         continue-on-error: true
 
       - name: Run EditMode tests
-        run: |
-          echo "Note: Uncomment when Unity is available in CI"
-          # $UNITY_EXEC -batchmode -quit -projectPath . -runTests -testPlatform EditMode -testResults TestResults/editmode-results.xml -logFile ci_tests.log
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: EditMode
+          artifactsPath: TestResults
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create UPM package archive
         run: |

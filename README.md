@@ -139,6 +139,40 @@ ETHERSCAN_KEY=...
 2. Set Base URL: `https://api.soulvan` (or local dev server)
 3. Auth token set automatically via `InitAuth()` at runtime
 
+### Unity CI/CD Setup
+
+**Automated Workflows** powered by GitHub Actions and GameCI:
+
+**Quick Start**:
+```bash
+# 1. Generate Unity license for CI
+Actions → Unity Activation → Run workflow
+# Download .alf file, get license from https://license.unity3d.com/manual
+
+# 2. Add secrets to repository
+Settings → Secrets and variables → Actions
+# Add: UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD
+
+# 3. Workflows run automatically on push/PR
+# Or trigger manually from Actions tab
+```
+
+**Available Workflows**:
+- **Unity Test Runner**: Automated EditMode and PlayMode tests
+- **Unity Build**: Multi-platform builds (Windows, Linux, macOS)
+- **Unity Package Validation**: Package structure and integrity checks
+- **NeonVault CI**: Complete pipeline with JSON import, tests, and release
+
+**Features**:
+- ✅ Automatic testing on every push
+- ✅ Multi-platform builds with artifact uploads
+- ✅ Package validation and distribution
+- ✅ GitHub Release creation for version tags
+- ✅ Library caching for 5-10x faster builds
+- ✅ Test result reporting in PRs
+
+**Documentation**: See [UNITY_CI_WORKFLOWS_GUIDE.md](UNITY_CI_WORKFLOWS_GUIDE.md) for complete setup instructions.
+
 ### Node.js API Setup
 
 **Install Dependencies**:
@@ -222,11 +256,26 @@ soulvan-replay remix R1234 storm-variant
   - Tier progression
   - DAO power visualization
 
+- **[UNITY_TOOLING_GUIDE.md](UNITY_TOOLING_GUIDE.md)** — Unity development tools
+  - Editor setup and configuration
+  - ScriptableObject importers
+  - Testing framework
+  - Command-line tools
+  - Performance optimization
+
+- **[UNITY_CI_WORKFLOWS_GUIDE.md](UNITY_CI_WORKFLOWS_GUIDE.md)** — CI/CD automation
+  - GitHub Actions workflows
+  - Unity Test Runner integration
+  - Multi-platform builds
+  - Package validation
+  - License activation guide
+
 ### Quick References
 
 - **[DEVELOPER_QUICKREF.md](DEVELOPER_QUICKREF.md)** — Cheat sheet for developers
 - **[FEATURE_MANIFEST.md](FEATURE_MANIFEST.md)** — Complete feature list
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — System architecture diagrams
+- **[CI_SETUP_GUIDE.md](CI_SETUP_GUIDE.md)** — CI secrets and configuration
 
 ---
 
