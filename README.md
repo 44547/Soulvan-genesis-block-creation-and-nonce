@@ -1,5 +1,9 @@
 # Soulvan - Complete Ecosystem
 
+[![Unity Test](https://github.com/44547/Soulvan-genesis-block-creation-and-nonce/actions/workflows/unity-test.yml/badge.svg)](https://github.com/44547/Soulvan-genesis-block-creation-and-nonce/actions/workflows/unity-test.yml)
+[![Unity Build](https://github.com/44547/Soulvan-genesis-block-creation-and-nonce/actions/workflows/unity-build.yml/badge.svg)](https://github.com/44547/Soulvan-genesis-block-creation-and-nonce/actions/workflows/unity-build.yml)
+[![Package Validation](https://github.com/44547/Soulvan-genesis-block-creation-and-nonce/actions/workflows/unity-package-validation.yml/badge.svg)](https://github.com/44547/Soulvan-genesis-block-creation-and-nonce/actions/workflows/unity-package-validation.yml)
+
 **Neon-Noir Universe** combining blockchain governance, GTA-style heist missions, and procedural saga remixing.
 
 This repository contains:
