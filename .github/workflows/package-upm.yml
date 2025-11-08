@@ -8,6 +8,10 @@ on:
       - 'Packages/com.soulvan.neonvault/**'
       - 'Assets/Soulvan/**'
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   build-package:
     runs-on: ubuntu-latest

@@ -3,6 +3,10 @@ name: Unity Activation
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   activation:
     name: Request Unity Activation File

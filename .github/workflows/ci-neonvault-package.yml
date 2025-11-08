@@ -13,6 +13,10 @@ env:
   PACKAGE_NAME: com.soulvan.neonvault
   PACKAGE_VERSION: 1.0.0
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   import-test-package:
     runs-on: ubuntu-latest

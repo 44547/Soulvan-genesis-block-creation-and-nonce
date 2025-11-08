@@ -14,6 +14,10 @@ on:
 env:
   UNITY_VERSION: '2021.3.31f1'
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   validate-package:
     name: Validate Unity Package

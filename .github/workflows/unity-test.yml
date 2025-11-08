@@ -20,6 +20,11 @@ on:
 env:
   UNITY_VERSION: '2021.3.31f1'
 
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
 jobs:
   test:
     name: Run Unity Tests
