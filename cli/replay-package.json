@@ -1,0 +1,45 @@
+{
+  "name": "@soulvan/replay-cli",
+  "version": "1.0.0",
+  "description": "Soulvan Replay Mint CLI - Bundle, remix, and export saga replays",
+  "main": "soulvan-replay-cli.js",
+  "bin": {
+    "soulvan": "./soulvan-replay-cli.js"
+  },
+  "scripts": {
+    "start": "node soulvan-replay-cli.js",
+    "build": "pkg . --targets node16-linux-x64,node16-macos-x64,node16-win-x64 --output dist/soulvan-replay"
+  },
+  "keywords": [
+    "soulvan",
+    "replay",
+    "remix",
+    "saga",
+    "blockchain",
+    "nft",
+    "lore"
+  ],
+  "author": "Soulvan Contributors",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "chalk": "^4.1.2",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soulvan/genesis-block.git"
+  },
+  "bugs": {
+    "url": "https://github.com/soulvan/genesis-block/issues"
+  },
+  "homepage": "https://soulvan.io"
+}

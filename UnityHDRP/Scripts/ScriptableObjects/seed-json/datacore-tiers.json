@@ -1,0 +1,44 @@
+[
+  {
+    "type": "SO_DatacoreTier",
+    "tierId": "datacore:standard",
+    "displayName": "Standard Datacore",
+    "rarityScore": 10,
+    "dropChance": 0.6,
+    "uiColor": "#C0C0FF",
+    "glowIntensity": 1.5,
+    "creditReward": 1000,
+    "experienceReward": 50,
+    "daoInfluenceBonus": 2.0,
+    "minPerformanceScore": 0.0,
+    "requiredRole": ""
+  },
+  {
+    "type": "SO_DatacoreTier",
+    "tierId": "datacore:rare",
+    "displayName": "Rare Datacore",
+    "rarityScore": 3,
+    "dropChance": 0.3,
+    "uiColor": "#8A5EFF",
+    "glowIntensity": 2.5,
+    "creditReward": 2500,
+    "experienceReward": 150,
+    "daoInfluenceBonus": 5.0,
+    "minPerformanceScore": 0.7,
+    "requiredRole": ""
+  },
+  {
+    "type": "SO_DatacoreTier",
+    "tierId": "datacore:mythic",
+    "displayName": "Mythic Datacore",
+    "rarityScore": 1,
+    "dropChance": 0.1,
+    "uiColor": "#FFD700",
+    "glowIntensity": 4.0,
+    "creditReward": 5000,
+    "experienceReward": 300,
+    "daoInfluenceBonus": 10.0,
+    "minPerformanceScore": 0.9,
+    "requiredRole": ""
+  }
+]

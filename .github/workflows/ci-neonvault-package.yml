@@ -1,0 +1,99 @@
+name: NeonVault CI Import, Test, Package, Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Assets/Soulvan/**'
+      - 'Packages/com.soulvan.neonvault/**'
+
+env:
+  UNITY_EXEC: Unity              # override if runner uses different path
+  PACKAGE_NAME: com.soulvan.neonvault
+  PACKAGE_VERSION: 1.0.0
+
+jobs:
+  import-test-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure dist folder
+        run: mkdir -p dist
+
+      - name: Set environment variables for importer
+        run: |
+          echo "SOULVAN_SEED_JSON_FOLDER=${{ github.workspace }}/Assets/Soulvan/ScriptableObjects/seed-json" >> $GITHUB_ENV
+
+      - name: Set EditorPrefs in Unity (writes ephemeral prefs)
+        env:
+          SOULVAN_API_BASE_URL: ${{ secrets.SOULVAN_API_BASE_URL }}
+          SOULVAN_REPLAY_ENDPOINT: ${{ secrets.SOULVAN_REPLAY_ENDPOINT }}
+          SOULVAN_DAO_ENDPOINT: ${{ secrets.SOULVAN_DAO_ENDPOINT }}
+          SOULVAN_DEFAULT_CONTRIBUTOR: ${{ secrets.SOULVAN_DEFAULT_CONTRIBUTOR }}
+          SOULVAN_IMPORTER_CSV_PATH: "Assets/Soulvan/Docs/import-log.csv"
+        run: |
+          echo "Note: Unity CLI commands require Unity installation on CI runner"
+          echo "Add Unity installation step before this or use game-ci/unity-builder action"
+          # $UNITY_EXEC -batchmode -quit -projectPath . -executeMethod Soulvan.CI.CIImportWrappers.SetEditorPrefsFromEnv -logFile ci_setprefs.log
+        continue-on-error: false
+
+      - name: Run JSON importer (strongly typed)
+        run: |
+          echo "Note: Uncomment when Unity is available in CI"
+          # $UNITY_EXEC -batchmode -quit -projectPath . -executeMethod Soulvan.CI.CIImportWrappers.RunStrongJsonImport -logFile ci_importer.log
+
+      - name: Run CSV importer variant (optional, produces import-log.csv)
+        if: always()
+        run: |
+          echo "Note: Uncomment when Unity is available in CI"
+          # $UNITY_EXEC -batchmode -quit -projectPath . -executeMethod Soulvan.CI.CIImportWrappers.RunCsvJsonImportWithLog -logFile ci_importer_csv.log
+        continue-on-error: true
+
+      - name: Run EditMode tests
+        run: |
+          echo "Note: Uncomment when Unity is available in CI"
+          # $UNITY_EXEC -batchmode -quit -projectPath . -runTests -testPlatform EditMode -testResults TestResults/editmode-results.xml -logFile ci_tests.log
+
+      - name: Create UPM package archive
+        run: |
+          mkdir -p dist
+          tar -czf dist/${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}.tgz Packages/${{ env.PACKAGE_NAME }}
+          ls -lh dist
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}.tgz
+          path: dist/${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}.tgz
+
+  publish-release:
+    needs: import-test-package
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: com.soulvan.neonvault-1.0.0.tgz
+          path: dist
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name || 'v1.0.0' }}
+          name: "NeonVault Heist Package ${{ github.run_number }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/com.soulvan.neonvault-1.0.0.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
