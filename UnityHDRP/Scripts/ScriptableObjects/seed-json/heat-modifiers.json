@@ -1,0 +1,80 @@
+{
+  "type": "SO_HeatModifiers",
+  "modifiers": [
+    {
+      "action": "alarmTriggered",
+      "heatDelta": 20.0,
+      "description": "Security alarm triggered - immediate heat spike"
+    },
+    {
+      "action": "datacorePickup",
+      "heatDelta": 5.0,
+      "description": "Datacore lifted from pedestal"
+    },
+    {
+      "action": "useHoloDecoy",
+      "heatDelta": -2.0,
+      "description": "Holo-decoy deployed - temporary heat reduction"
+    },
+    {
+      "action": "magrailEntry",
+      "heatDelta": -1.0,
+      "description": "Silent magrail approach - stealth bonus"
+    },
+    {
+      "action": "streetParadeEntry",
+      "heatDelta": 8.0,
+      "description": "Crowded parade approach - moderate heat"
+    },
+    {
+      "action": "breach:pattern:success",
+      "heatDelta": 10.0,
+      "description": "Pattern breach completed"
+    },
+    {
+      "action": "breach:pattern:failed",
+      "heatDelta": 25.0,
+      "description": "Pattern breach failed - security alerted"
+    },
+    {
+      "action": "breach:hatch",
+      "heatDelta": 5.0,
+      "description": "Service hatch breach"
+    },
+    {
+      "action": "combat:kill",
+      "heatDelta": 20.0,
+      "description": "Enemy neutralized - high alert"
+    },
+    {
+      "action": "combat:stun",
+      "heatDelta": 10.0,
+      "description": "Enemy stunned - moderate alert"
+    },
+    {
+      "action": "stealth:takedown",
+      "heatDelta": 5.0,
+      "description": "Silent takedown - minimal alert"
+    },
+    {
+      "action": "vehicle:damaged",
+      "heatDelta": 15.0,
+      "description": "Vehicle damaged - pursuit intensifies"
+    },
+    {
+      "action": "vehicle:destroyed",
+      "heatDelta": 50.0,
+      "description": "Vehicle destroyed - mission critical"
+    },
+    {
+      "action": "datacore:dropped",
+      "heatDelta": 10.0,
+      "description": "Datacore dropped - security tracking"
+    },
+    {
+      "action": "datacore:tradeoff",
+      "heatDelta": 0.0,
+      "description": "Datacore traded between players - no heat change"
+    }
+  ]
+}

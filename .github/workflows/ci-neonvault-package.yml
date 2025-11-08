@@ -1,0 +1,139 @@
+name: NeonVault CI Import, Test, Package, Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Assets/Soulvan/**'
+      - 'Packages/com.soulvan.neonvault/**'
+
+env:
+  UNITY_VERSION: '2021.3.31f1'
+  PACKAGE_NAME: com.soulvan.neonvault
+  PACKAGE_VERSION: 1.0.0
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  import-test-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Cache Unity Library
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-ci-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-ci-
+            Library-
+
+      - name: Ensure dist folder
+        run: mkdir -p dist
+
+      - name: Set environment variables for importer
+        run: |
+          echo "SOULVAN_SEED_JSON_FOLDER=${{ github.workspace }}/Assets/Soulvan/ScriptableObjects/seed-json" >> $GITHUB_ENV
+          echo "SOULVAN_API_BASE_URL=${{ secrets.SOULVAN_API_BASE_URL }}" >> $GITHUB_ENV
+          echo "SOULVAN_REPLAY_ENDPOINT=${{ secrets.SOULVAN_REPLAY_ENDPOINT }}" >> $GITHUB_ENV
+          echo "SOULVAN_DAO_ENDPOINT=${{ secrets.SOULVAN_DAO_ENDPOINT }}" >> $GITHUB_ENV
+          echo "SOULVAN_DEFAULT_CONTRIBUTOR=${{ secrets.SOULVAN_DEFAULT_CONTRIBUTOR }}" >> $GITHUB_ENV
+          echo "SOULVAN_IMPORTER_CSV_PATH=Assets/Soulvan/Docs/import-log.csv" >> $GITHUB_ENV
+
+      - name: Set EditorPrefs in Unity (writes ephemeral prefs)
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: StandaloneLinux64
+          buildMethod: Soulvan.CI.CIImportWrappers.SetEditorPrefsFromEnv
+          allowDirtyBuild: true
+        continue-on-error: false
+
+      - name: Run JSON importer (strongly typed)
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: StandaloneLinux64
+          buildMethod: Soulvan.CI.CIImportWrappers.RunStrongJsonImport
+          allowDirtyBuild: true
+
+      - name: Run CSV importer variant (optional, produces import-log.csv)
+        if: always()
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: StandaloneLinux64
+          buildMethod: Soulvan.CI.CIImportWrappers.RunCsvJsonImportWithLog
+          allowDirtyBuild: true
+        continue-on-error: true
+
+      - name: Run EditMode tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: EditMode
+          artifactsPath: TestResults
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create UPM package archive
+        run: |
+          mkdir -p dist
+          tar -czf dist/${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}.tgz Packages/${{ env.PACKAGE_NAME }}
+          ls -lh dist
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}.tgz
+          path: dist/${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}.tgz
+
+  publish-release:
+    needs: import-test-package
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: com.soulvan.neonvault-1.0.0.tgz
+          path: dist
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name || 'v1.0.0' }}
+          name: "NeonVault Heist Package ${{ github.run_number }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/com.soulvan.neonvault-1.0.0.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,104 @@
+name: Unity Package Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'Packages/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'Packages/**'
+  workflow_dispatch:
+
+env:
+  UNITY_VERSION: '2021.3.31f1'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate-package:
+    name: Validate Unity Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache Unity Library
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-package-validation-${{ hashFiles('Packages/**') }}
+          restore-keys: |
+            Library-package-validation-
+            Library-
+
+      - name: Validate package.json
+        run: |
+          echo "Validating package.json files..."
+          for package in Packages/*/package.json; do
+            if [ -f "$package" ]; then
+              echo "Checking $package"
+              node -e "JSON.parse(require('fs').readFileSync('$package', 'utf8'))"
+              echo "✓ Valid JSON"
+            fi
+          done
+
+      - name: Check package structure
+        run: |
+          echo "Checking NeonVault package structure..."
+          
+          # Check required files
+          required_files=(
+            "Packages/com.soulvan.neonvault/package.json"
+            "Packages/com.soulvan.neonvault/README.md"
+          )
+          
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing required file: $file"
+              exit 1
+            else
+              echo "✓ Found: $file"
+            fi
+          done
+
+      - name: Run Unity package validation
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: EditMode
+          customParameters: -nographics
+
+      - name: Create package archive
+        run: |
+          mkdir -p dist
+          cd Packages/com.soulvan.neonvault
+          tar -czf ../../dist/com.soulvan.neonvault-$(node -p "require('./package.json').version").tgz .
+          cd ../..
+          ls -lh dist/
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: unity-package
+          path: dist/*.tgz
+          retention-days: 7
+
+      - name: Validation summary
+        run: |
+          echo "=========================================="
+          echo "Package Validation Summary"
+          echo "=========================================="
+          echo "✓ Package JSON structure is valid"
+          echo "✓ Required files present"
+          echo "✓ Package archive created successfully"
+          echo "=========================================="

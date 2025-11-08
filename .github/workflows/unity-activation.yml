@@ -1,0 +1,46 @@
+name: Unity Activation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  activation:
+    name: Request Unity Activation File
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Request manual activation file
+        uses: game-ci/unity-request-activation-file@v2
+        id: getManualLicenseFile
+        with:
+          unityVersion: 2021.3.31f1
+
+      - name: Upload activation file
+        uses: actions/upload-artifact@v3
+        with:
+          name: Unity_v2021.3.31f1.alf
+          path: ${{ steps.getManualLicenseFile.outputs.filePath }}
+          retention-days: 7
+
+      - name: Instructions
+        run: |
+          echo "=========================================="
+          echo "Unity Activation Instructions:"
+          echo "=========================================="
+          echo ""
+          echo "1. Download the .alf file from the artifacts section above"
+          echo "2. Go to https://license.unity3d.com/manual"
+          echo "3. Upload the .alf file"
+          echo "4. Download the .ulf license file"
+          echo "5. Open the .ulf file in a text editor and copy its contents"
+          echo "6. Go to your repository Settings -> Secrets and variables -> Actions"
+          echo "7. Create a new repository secret named UNITY_LICENSE"
+          echo "8. Paste the contents of the .ulf file as the secret value"
+          echo ""
+          echo "=========================================="

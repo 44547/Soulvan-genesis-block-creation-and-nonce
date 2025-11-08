@@ -1,0 +1,48 @@
+{
+  "name": "@soulvan/badge-cli",
+  "version": "1.0.0",
+  "description": "Soulvan Badge Forge CLI - Mint, upgrade, and export contributor badges",
+  "main": "soulvan-badge-cli.js",
+  "bin": {
+    "soulvan-badge": "./soulvan-badge-cli.js"
+  },
+  "scripts": {
+    "start": "node soulvan-badge-cli.js",
+    "test": "jest",
+    "build": "pkg . --targets node16-linux,node16-macos,node16-win --output dist/soulvan-badge"
+  },
+  "keywords": [
+    "soulvan",
+    "badge",
+    "cli",
+    "blockchain",
+    "gaming",
+    "contributor",
+    "dao",
+    "nft"
+  ],
+  "author": "Soulvan Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soulvan/badge-forge-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/soulvan/badge-forge-cli/issues"
+  },
+  "homepage": "https://soulvan.io",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "chalk": "^4.1.2",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "pkg": "^5.8.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

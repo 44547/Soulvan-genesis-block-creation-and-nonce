@@ -1,0 +1,14 @@
+{
+  "name": "com.soulvan.neonvault",
+  "displayName": "Soulvan NeonVault Heist",
+  "version": "1.0.0",
+  "unity": "2020.3",
+  "description": "Neon Vault Heist mission scaffold: prefabs, scripts, SO seeds, audio stems and editor importer.",
+  "keywords": ["soulvan","heist","neon","replay","dao"],
+  "author": {
+    "name": "Soulvan",
+    "email": "devs@soulvan.example",
+    "url": "https://soulvan.example"
+  },
+  "dependencies": {}
+}
